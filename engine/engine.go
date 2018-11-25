@@ -1,10 +1,10 @@
 package engine
 
-import(
-	"errors"
+import (
 	"fmt"
+	"github.com/Dorbmon/RVm/engine/compile"
 	"github.com/Dorbmon/RVm/engine/error"
-	StructData "github.com/Dorbmon/RVm/struct"
+	"github.com/Dorbmon/RVm/struct"
 	"math/rand"
 	"os"
 	"os/exec"
@@ -62,13 +62,22 @@ again2:
 	this.Progress[Name].Name = Name
 	return true,ProgressId
 }
-func (this RVM)LoadCode(ProgressId uint64,From uint64,Code StructData.Code)(ok bool,err error){
+func (this RVM)LoadUncompiledCode(ProgressId uint64,From uint64,Code StructData.Code)(bool,StructData.EngineError){
 	//查找进程
 	Progress,ok := this.ProgressById[ProgressId]
 	if !ok{
-		return false,errors.New("Can't Find that Progress")
+		return false,StructData.MakeError(EngineError.Bad,"Can't Find that Progress")
 	}
-
+	//开始载入代码。并且编译代码
+	Progress.Compiler = &compile.Compiler{}
+	Progress.Compiler.LoadCode(Code)
+	ok,EngineErr,CompiledCode := Progress.Compiler.Compile()
+	if !ok{
+		this.ThrowError(EngineErr)
+		return false,EngineErr
+	}
+	Progress.CompiledCode = CompiledCode
+	return false,StructData.EmptyError
 }
 
 func (this RVM)ThrowError(Error StructData.EngineError){

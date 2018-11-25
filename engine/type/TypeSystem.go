@@ -8,3 +8,4 @@ const(
 	UInt64 = iota
 	Byte = iota
 )
+type Type uint
