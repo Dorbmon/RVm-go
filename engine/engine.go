@@ -3,7 +3,9 @@ package engine
 import (
 	"fmt"
 	"github.com/Dorbmon/RVm/engine/compile"
+	"github.com/Dorbmon/RVm/engine/compile/orderDefine"
 	"github.com/Dorbmon/RVm/engine/error"
+	"github.com/Dorbmon/RVm/engine/memory"
 	"github.com/Dorbmon/RVm/struct"
 	"math/rand"
 	"os"
@@ -79,7 +81,33 @@ func (this RVM)LoadUncompiledCode(ProgressId uint64,From uint64,Code StructData.
 	Progress.CompiledCode = CompiledCode
 	return false,StructData.EmptyError
 }
+func (this RVM)RunCode(ProgressId uint64)(StructData.EngineError){
+	//寻找进程
+	Progress,ok := this.ProgressById[ProgressId]
+	if !ok{
+		return StructData.MakeError(EngineError.Bad,"Can't Find that Progress")
+	}
+	if Progress.CompiledCode == nil{	//还没有代码
+		return StructData.MakeError(EngineError.Bad,"No Code in Progress " + strconv.FormatUint(ProgressId,64))
+	}
+	//开始执行
+	for Line := 0;;Line ++{
+		NowLine := Progress.CompiledCode.Lines[Line]
+		switch NowLine.Order{
+		case orderDefine.NewVar:{
+			//创建新的变量
+			Varname := NowLine.Data[0]	//开始申请变量
+			Memory := (memory.Memory)(Progress.Memory)
+			Memory.AddVariable(Varname,nil)
+			break
+		}
+		case orderDefine.SetVar:{	//设置变量的值 设置为栈顶的数据的值
 
+		}
+
+		}
+	}
+}
 func (this RVM)ThrowError(Error StructData.EngineError){
 	//根据错误等级来判断处理方式 首先先输出错误
 	Data := strconv.Itoa(Error.Class) + " " + Error.Time + "" + Error.Data

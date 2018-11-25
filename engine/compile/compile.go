@@ -34,7 +34,7 @@ func (this *Compiler)TranslateStringToINT(code StructData.Code)(*StructData.Comp
 	for Line := 0;Line < len(code.Lines);Line ++{
 		//开始对每一行进行处理，根据硬性规定，每一行只有第一个单词为命令
 		result.Lines[Line] = &StructData.CodeLine{}
-		result.Lines[Line].Order,err = toInt(code.Lines[Line][0])
+		result.Lines[Line].Order,err = toInt(code.Lines[Line][0],len(code.Lines[Line]) - 1)
 		if StructData.CheckError(err){	//出现不存在的指令
 			return nil,err
 		}
@@ -43,15 +43,25 @@ func (this *Compiler)TranslateStringToINT(code StructData.Code)(*StructData.Comp
 	}
 	return result,StructData.EmptyError
 }
-func toInt(key string)(int,StructData.EngineError){
+var ErrorArgument = StructData.MakeError(EngineError.Bad,"Error number of arguments")
+func toInt(key string, NumberOfArguments int)(int,StructData.EngineError){		//并且检查参数个数
 	switch key {
 	case "SetSystem":{
+		if NumberOfArguments != orderDefine.NSetSystem{	//判断参数个数是不是匹配
+			return 0,ErrorArgument
+		}
 		return orderDefine.SetSystem,StructData.EmptyError
 	}
 	case "NewVar":{
+		if NumberOfArguments != orderDefine.NNewVar{	//判断参数个数是不是匹配
+			return 0,ErrorArgument
+		}
 		return orderDefine.NewVar,StructData.EmptyError
 	}
 	case "SetVar":{
+		if NumberOfArguments != orderDefine.NSetVar{	//判断参数个数是不是匹配
+			return 0,ErrorArgument
+		}
 		return orderDefine.SetVar,StructData.EmptyError
 	}
 	default:{
