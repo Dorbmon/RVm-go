@@ -45,6 +45,7 @@ func (this *Compiler)TranslateStringToINT(code StructData.Code)(*StructData.Comp
 }
 var ErrorArgument = StructData.MakeError(EngineError.Bad,"Error number of arguments")
 func toInt(key string, NumberOfArguments int)(int,StructData.EngineError){		//并且检查参数个数
+//作为虚拟机，需要进行高强度的检测。 包括前后参数的设置
 	switch key {
 	case "SetSystem":{
 		if NumberOfArguments != orderDefine.NSetSystem{	//判断参数个数是不是匹配

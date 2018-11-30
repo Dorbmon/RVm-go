@@ -6,6 +6,7 @@ import (
 	"github.com/Dorbmon/RVm/engine/compile/orderDefine"
 	"github.com/Dorbmon/RVm/engine/error"
 	"github.com/Dorbmon/RVm/engine/memory"
+	"github.com/Dorbmon/RVm/engine/orderLinker"
 	"github.com/Dorbmon/RVm/struct"
 	"math/rand"
 	"os"
@@ -34,8 +35,8 @@ func (this RVM)Init(){
 	return
 }
 func (this RVM)CreateProgress(Name string)(Ok bool,ProgressId uint64){
+	ProgressId = uint64(0)
 	if Name == ""{	//无名称形式启动进程
-		ProgressId := uint64(0)
 		again:
 			ProgressId = rand.Uint64()
 			if this.ProgressById[ProgressId].Id != 0{
@@ -44,25 +45,30 @@ func (this RVM)CreateProgress(Name string)(Ok bool,ProgressId uint64){
 		//创建成功 马上进行进程初始化。
 		this.ProgressById[ProgressId].Id = ProgressId
 		this.ProgressById[ProgressId].Slience = make([]StructData.Slience,1)
-		return true,ProgressId
+	}else {
+		_, ok := this.Progress[Name]
+		if ok { //该进程名称已经被占用
+			return false, 0
+		}
+		ProgressId = uint64(0)
+	again2:
+		ProgressId = rand.Uint64()
+		if this.ProgressById[ProgressId].Id != 0 {
+			goto again2
+		}
+		NewProgress := StructData.Progress{}
+		this.ProgressById[ProgressId] = &NewProgress
+		this.Progress[Name] = &NewProgress
+		this.Progress[Name].Id = ProgressId
+		this.Progress[Name].Slience = make([]StructData.Slience, 1)
+		this.Progress[Name].Name = Name
+
 	}
-	_,ok := this.Progress[Name]
-	if ok {	//该进程名称已经被占用
-		return false,0
-	}
-	ProgressId = uint64(0)
-again2:
-	ProgressId = rand.Uint64()
-	if this.ProgressById[ProgressId].Id != 0{
-		goto again2
-	}
-	NewProgress := StructData.Progress{}
-	this.ProgressById[ProgressId] = &NewProgress
-	this.Progress[Name] = &NewProgress
-	this.Progress[Name].Id = ProgressId
-	this.Progress[Name].Slience = make([]StructData.Slience,1)
-	this.Progress[Name].Name = Name
-	return true,ProgressId
+	//初始化指令链接系统，并进行初始化链接
+	this.ProgressById[ProgressId].OrderLinker = &orderLinker.OrderLinker{}
+
+
+	return true, ProgressId
 }
 func (this RVM)LoadUncompiledCode(ProgressId uint64,From uint64,Code StructData.Code)(bool,StructData.EngineError){
 	//查找进程

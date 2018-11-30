@@ -3,6 +3,7 @@ package StructData
 import (
 	"github.com/Dorbmon/RVm/engine"
 	"github.com/Dorbmon/RVm/engine/compile"
+	"github.com/Dorbmon/RVm/engine/orderLinker"
 	"github.com/Dorbmon/RVm/engine/type"
 	"os"
 	"sync"
@@ -35,6 +36,7 @@ type Progress struct{	//单个进程
 	Memory Memory
 	Compiler *compile.Compiler
 	CompiledCode *CompiledCode
+	OrderLinker *orderLinker.OrderLinker
 }
 type Slience struct{	//进程切片
 	From uint64
@@ -81,4 +83,9 @@ func MakeError(Class int,Data string)EngineError{
 	temp.Data = Data
 	temp.Class = Class
 	return temp
+}
+
+type StackObject struct{	//栈中数据对象
+	Data interface{}
+	Type int
 }
