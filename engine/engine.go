@@ -3,10 +3,9 @@ package engine
 import (
 	"fmt"
 	"github.com/Dorbmon/RVm/engine/compile"
-	"github.com/Dorbmon/RVm/engine/compile/orderDefine"
 	"github.com/Dorbmon/RVm/engine/error"
-	"github.com/Dorbmon/RVm/engine/memory"
 	"github.com/Dorbmon/RVm/engine/orderLinker"
+	"github.com/Dorbmon/RVm/engine/stack"
 	"github.com/Dorbmon/RVm/struct"
 	"math/rand"
 	"os"
@@ -66,8 +65,7 @@ func (this RVM)CreateProgress(Name string)(Ok bool,ProgressId uint64){
 	}
 	//初始化指令链接系统，并进行初始化链接
 	this.ProgressById[ProgressId].OrderLinker = &orderLinker.OrderLinker{}
-
-
+	this.ProgressById[ProgressId].Stack = &stack.Stack{}
 	return true, ProgressId
 }
 func (this RVM)LoadUncompiledCode(ProgressId uint64,From uint64,Code StructData.Code)(bool,StructData.EngineError){
@@ -79,7 +77,7 @@ func (this RVM)LoadUncompiledCode(ProgressId uint64,From uint64,Code StructData.
 	//开始载入代码。并且编译代码
 	Progress.Compiler = &compile.Compiler{}
 	Progress.Compiler.LoadCode(Code)
-	ok,EngineErr,CompiledCode := Progress.Compiler.Compile()
+	ok,EngineErr,CompiledCode := Progress.Compiler.Compile(Progress.OrderLinker)
 	if !ok{
 		this.ThrowError(EngineErr)
 		return false,EngineErr
@@ -99,19 +97,13 @@ func (this RVM)RunCode(ProgressId uint64)(StructData.EngineError){
 	//开始执行
 	for Line := 0;;Line ++{
 		NowLine := Progress.CompiledCode.Lines[Line]
-		switch NowLine.Order{
-		case orderDefine.NewVar:{
-			//创建新的变量
-			Varname := NowLine.Data[0]	//开始申请变量
-			Memory := (memory.Memory)(Progress.Memory)
-			Memory.AddVariable(Varname,nil)
-			break
-		}
-		case orderDefine.SetVar:{	//设置变量的值 设置为栈顶的数据的值
-
-		}
-
-		}
+		//获取到指令立刻调用OrderLinker中对应的函数
+			Function := Progress.OrderLinker.GetFunction(NowLine.Order)
+			err := Function(NowLine.Data,Progress.Stack)
+			if StructData.CheckError(err){	//引擎出现错误
+				this.ThrowError(err)
+			}
+			continue
 	}
 }
 func (this RVM)ThrowError(Error StructData.EngineError){

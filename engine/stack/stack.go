@@ -7,6 +7,7 @@ import (
 
 type Stack struct{
 	TopNode *node
+	MaxDeep uint
 }
 
 type node struct{
@@ -15,6 +16,9 @@ type node struct{
 }
 func (this *Stack)Empty()bool{	//返回是否为空
 	return this.TopNode == nil
+}
+func (this *Stack)SetMaxDeep(deep int){	//不能删除已经存在的数据
+
 }
 func (this *Stack)Push(Data interface{},Type int)(StructData.EngineError){
 	var TargetNode *node

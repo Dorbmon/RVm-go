@@ -4,6 +4,7 @@ import (
 	"github.com/Dorbmon/RVm/engine"
 	"github.com/Dorbmon/RVm/engine/compile"
 	"github.com/Dorbmon/RVm/engine/orderLinker"
+	"github.com/Dorbmon/RVm/engine/stack"
 	"github.com/Dorbmon/RVm/engine/type"
 	"os"
 	"sync"
@@ -37,6 +38,7 @@ type Progress struct{	//单个进程
 	Compiler *compile.Compiler
 	CompiledCode *CompiledCode
 	OrderLinker *orderLinker.OrderLinker
+	Stack *stack.Stack
 }
 type Slience struct{	//进程切片
 	From uint64
