@@ -3,11 +3,13 @@ package stack
 import (
 	"github.com/Dorbmon/RVm/engine/error"
 	"github.com/Dorbmon/RVm/struct"
+	"strconv"
 )
 
 type Stack struct{
 	TopNode *node
-	MaxDeep uint
+	MaxDeep int
+	NowDeep int
 }
 
 type node struct{
@@ -18,9 +20,15 @@ func (this *Stack)Empty()bool{	//返回是否为空
 	return this.TopNode == nil
 }
 func (this *Stack)SetMaxDeep(deep int){	//不能删除已经存在的数据
-
+	this.MaxDeep = deep
+	return
 }
 func (this *Stack)Push(Data interface{},Type int)(StructData.EngineError){
+	if this.MaxDeep == -1 || this.NowDeep < this.MaxDeep{
+		this.NowDeep ++
+	}else{
+		return StructData.MakeError(EngineError.Mid,"There is no space for stack,Because Max Deep is" + strconv.Itoa(this.MaxDeep))
+	}
 	var TargetNode *node
 	if this.TopNode == nil{	//栈中为空
 		this.TopNode = &node{}

@@ -16,6 +16,7 @@ type OrderLinker struct {
 }
 type order struct{
 	Function LinkerFunction
+	CheckFunction CheckFunction
 	ArgumentNumber int
 }
 type Argument struct {
@@ -23,6 +24,7 @@ type Argument struct {
 	Type TypeSystem.Type
 }
 type LinkerFunction func(Arguments []string,Stack *stack.Stack)StructData.EngineError	//对方函数不需要判断参数个数，因为在传递调用之前一定是已经完成参数个数检测的。
+type CheckFunction func(Arguments []string)StructData.EngineError	//用来在编译时期检测参数类型等信息
 func (this *OrderLinker)GetAnRandomOrderInt()int{
 again:
 	r := int(math.Abs(float64(rand.Intn(10000))))
@@ -51,9 +53,9 @@ func (this *OrderLinker)TranslateToInt(OrderString string)(int,StructData.Engine
 	}
 	return *this.orderString[OrderString],StructData.EmptyError
 }
-func (this *OrderLinker)GetOrderArgumentNumber(OrderInt int)int{	//假设命令一定存在	获取对应命令的参数个数 用来编译时检查
-	return this.order[OrderInt].ArgumentNumber
-}
 func (this *OrderLinker)GetFunction(OrderInt int)LinkerFunction{	//假设已经存在
 	return this.order[OrderInt].Function
+}
+func (this *OrderLinker)GetCheckFunction(OrderInt int)CheckFunction{
+	return this.order[OrderInt].CheckFunction
 }
