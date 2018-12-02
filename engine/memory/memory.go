@@ -4,7 +4,6 @@ import (
 	"github.com/Dorbmon/RVm/engine"
 	"github.com/Dorbmon/RVm/engine/error"
 	"github.com/Dorbmon/RVm/struct"
-	"time"
 )
 
 type Memory StructData.Memory
@@ -17,44 +16,31 @@ func (this Memory) Init(Master *StructData.Memory,Engine *engine.RVM){	//Master�
 	this.Engine = Engine
 	return
 }
-func (this Memory) AddVariable(Name string,Value *StructData.Value){
+func (this Memory) AddVariable(Name string,Value *StructData.Value)StructData.EngineError{
 	this.UseLock.Lock()
 	if this.Master != nil{
-		(*Memory)(this.Master).AddVariable(Name,Value)
+		result := (*Memory)(this.Master).AddVariable(Name,Value)
 		this.UseLock.Unlock()
-		return
+		return result
 	}
 	_,ok := this.Variables[Name]
 	if ok{	//变量已经存在。说明代码有误，必须停止代码执行。
 		this.UseLock.Unlock()
-		NewError := StructData.EngineError{}
-		NewError.Class = EngineError.Bad
-		NewError.Time = time.Now().String()
-		NewError.Data = "Tried to define a existed variable :" + Name
-
-		this.Engine.ThrowError(NewError)
-		return
+		return StructData.MakeError(EngineError.Bad,"Tried to define a existed variable :" + Name)
 	}	//如无错误，开始制造变量
 	this.Variables[Name].Name = Name
 	this.Variables[Name].Value = Value
 	this.UseLock.Unlock()
-	return
+	return StructData.EmptyError
 }
-func (this Memory) SetVariable(Name string,Value *StructData.Value){
+func (this Memory) SetVariable(Name string,Value *StructData.Value)StructData.EngineError{
 	if this.Master != nil{
-		(*Memory)(this.Master).SetVariable(Name,Value)
-		return
+		return (*Memory)(this.Master).SetVariable(Name,Value)
 	}
 	_,ok := this.Variables[Name]
 	if !ok{	//变量不存在。说明代码有误，必须停止代码执行。
-		this.UseLock.Unlock()
-		NewError := StructData.EngineError{}
-		NewError.Class = EngineError.Bad
-		NewError.Time = time.Now().String()
-		NewError.Data = "Tried to use a undefined variable :" + Name
-		this.Engine.ThrowError(NewError)
-		return
+		return StructData.MakeError(EngineError.Bad,"Tried to use a undefined variable :" + Name)
 	}	//如无错误，开始制造变量
 	this.Variables[Name].Value = Value
-	return
+	return StructData.EmptyError
 }

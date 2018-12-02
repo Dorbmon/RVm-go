@@ -11,19 +11,37 @@ import (
 type VmDeal struct {
 	vm *engine.RVM
 	Progress *StructData.Progress
+	OrderInt struct{
+		SetSystem int
+	}
 }
 func (this VmDeal)ChangeProgress(NewProgress *StructData.Progress){
 	this.Progress = NewProgress
 }
 func (this VmDeal)RegisterAll(vm *engine.RVM,linker *orderLinker.OrderLinker,Progress *StructData.Progress)StructData.EngineError{
 	SetSystem := linker.GetAnRandomOrderInt()
-	err := linker.RegisterOrder(SetSystem,"SetSystem",2,this.SetSystem)
+	err := linker.RegisterOrder(SetSystem,"SetSystem",2,this.SetSystem,this.CheckFunction)
 	if StructData.CheckError(err){
 		return err
 	}
-
+	this.OrderInt.SetSystem = SetSystem
 	this.Progress = Progress
 	this.vm = vm
+	return StructData.EmptyError
+}
+func (this VmDeal)CheckFunction(OrderInt int,argument []string)StructData.EngineError{
+	switch OrderInt{
+	case this.OrderInt.SetSystem:{	//该命令第一个为整数，第二个任意
+		_,err := strconv.Atoi(argument[0])
+		if err != nil{
+			return StructData.MakeError(EngineError.Bad,err.Error())
+		}
+		break
+	}
+	default:{
+		return StructData.MakeError(EngineError.Bad,"Undefined Setting of " + strconv.Itoa(OrderInt))
+	}
+	}
 	return StructData.EmptyError
 }
 
