@@ -7,8 +7,8 @@ import (
 	"github.com/Dorbmon/RVm/engine/memory"
 	"github.com/Dorbmon/RVm/engine/orderLinker"
 	"github.com/Dorbmon/RVm/engine/stack"
+	"github.com/Dorbmon/RVm/engine/type"
 	"github.com/Dorbmon/RVm/struct"
-	"strconv"
 )
 
 type Memory struct{
@@ -36,7 +36,7 @@ func (this Memory)NewVar(Arguments []string,Stack *stack.Stack)StructData.Engine
 	varName := Arguments[0]
 	Memory := (memory.Memory)(this.Progress.Memory)
 	Value := &StructData.Value{}
-	Value.Type =
+	Value.Type = TypeSystem.Unknown
 	return Memory.AddVariable(varName,&StructData.Value{})
 }
 func (this Memory)CheckFunction(OrderInt int,Arguments []string)StructData.EngineError{

@@ -2,6 +2,7 @@ package memory
 
 import (
 	"github.com/Dorbmon/RVm/engine"
+	"github.com/Dorbmon/RVm/engine/ability/memory"
 	"github.com/Dorbmon/RVm/engine/error"
 	"github.com/Dorbmon/RVm/struct"
 )
@@ -43,4 +44,9 @@ func (this Memory) SetVariable(Name string,Value *StructData.Value)StructData.En
 	}	//如无错误，开始制造变量
 	this.Variables[Name].Value = Value
 	return StructData.EmptyError
+}
+func (this Memory) GetType(Name string)int{
+	if this.Master != nil{
+		return (*memory.Memory)(this.Master).
+	}
 }

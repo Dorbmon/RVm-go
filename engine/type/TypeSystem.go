@@ -8,6 +8,7 @@ const(
 	UInt64 = iota
 	Byte = iota
 	Unknown = iota
+	LastOne = iota
 )
 type Type uint
 
@@ -29,4 +30,7 @@ func StringToType(Type string)int{	//用于检验和转换类型
 		return Unknown
 	}
 	return -1
+}
+func TypeExist(Type int)bool{	//判断类型是否存在
+	return (String <=Type) && (Type <= LastOne)
 }
