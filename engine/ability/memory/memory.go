@@ -27,7 +27,10 @@ func (this Memory)RegisterAll(vm *engine.RVM,linker *orderLinker.OrderLinker,Pro
 		return err
 	}
 	SetVar := linker.GetAnRandomOrderInt()
-	err := linker.RegisterOrder(SetVar,"setvar",this.SetVar,this.CheckFunction)
+	err = linker.RegisterOrder(SetVar,"setvar",this.SetVar,this.CheckFunction)
+	if StructData.CheckError(err){
+		return err
+	}
 	this.Progress = Progress
 	this.vm = vm
 	return StructData.EmptyError
@@ -57,5 +60,9 @@ func (this Memory)CheckFunction(OrderInt int,Arguments []string)StructData.Engin
 }
 func (this Memory)SetVar(Arguments []string,Stack *stack.Stack)StructData.EngineError{
 	varName := Arguments[0]
-	return (memory.Memory)(this.Progress.Memory).SetVariable(varName,ability.AddString(Arguments[1:]))
+	value := &StructData.Value{}
+	value.Value = ability.AddString(Arguments[1:])
+	value.Type = (memory.Memory)(this.Progress.Memory).GetType(varName)
+	return (memory.Memory)(this.Progress.Memory).SetVariable(varName,value)
+
 }

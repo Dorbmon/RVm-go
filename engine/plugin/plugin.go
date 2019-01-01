@@ -81,7 +81,7 @@ func (this *PluginController)Load(DirName string)StructData.EngineError{	//ç›¸å¯
 		}
 
 	}
-
+	return StructData.EmptyError
 }
 func getDirList(dirpath string) ([]string, error) {
 	var dir_list []string

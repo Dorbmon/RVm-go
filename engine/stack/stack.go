@@ -6,16 +6,8 @@ import (
 	"strconv"
 )
 
-type Stack struct{
-	TopNode *node
-	MaxDeep int
-	NowDeep int
-}
+type Stack StructData.Stack
 
-type node struct{
-	NodeAfter *node
-	Data *StructData.StackObject
-}
 func (this *Stack)Empty()bool{	//返回是否为空
 	return this.TopNode == nil
 }
@@ -29,13 +21,13 @@ func (this *Stack)Push(Data interface{},Type int)(StructData.EngineError){
 	}else{
 		return StructData.MakeError(EngineError.Mid,"There is no space for stack,Because Max Deep is" + strconv.Itoa(this.MaxDeep))
 	}
-	var TargetNode *node
+	var TargetNode *StructData.Node
 	if this.TopNode == nil{	//栈中为空
-		this.TopNode = &node{}
+		this.TopNode = &StructData.Node{}
 		TargetNode = this.TopNode
 	}else{
 		tempNode := this.TopNode
-		this.TopNode = &node{}
+		this.TopNode = &StructData.Node{}
 		this.TopNode.NodeAfter = tempNode
 	}
 	TargetNode.Data = &StructData.StackObject{}

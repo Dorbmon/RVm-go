@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"unsafe"
 )
 type RVM StructData.RVM
 func (this RVM)Init(){
@@ -64,8 +65,8 @@ func (this RVM)CreateProgress(Name string)(Ok bool,ProgressId uint64){
 
 	}
 	//初始化指令链接系统，并进行初始化链接
-	this.ProgressById[ProgressId].OrderLinker = &orderLinker.OrderLinker{}
-	this.ProgressById[ProgressId].Stack = &stack.Stack{}
+	this.ProgressById[ProgressId].OrderLinker = &StructData.OrderLinker{}
+	this.ProgressById[ProgressId].Stack = &StructData.Stack{}
 	return true, ProgressId
 }
 func (this RVM)LoadUncompiledCode(ProgressId uint64,From uint64,Code StructData.Code)(bool,StructData.EngineError){
@@ -75,8 +76,8 @@ func (this RVM)LoadUncompiledCode(ProgressId uint64,From uint64,Code StructData.
 		return false,StructData.MakeError(EngineError.Bad,"Can't Find that Progress")
 	}
 	//开始载入代码。并且编译代码
-	Progress.Compiler = &compile.Compiler{}
-	Progress.Compiler.LoadCode(Code)
+	Progress.Compiler = &StructData.Compiler{}
+	c := unsafe.Pointer(Progress.Compiler)
 	ok,EngineErr,CompiledCode := Progress.Compiler.Compile(Progress.OrderLinker)
 	if !ok{
 		this.ThrowError(EngineErr)

@@ -6,9 +6,7 @@ import (
 	"github.com/Dorbmon/RVm/struct"
 )
 
-type Compiler struct{
-	Code StructData.Code
-}
+type Compiler StructData.Compiler
 
 func (this *Compiler)LoadCode(Code StructData.Code){
 	this.Code = Code
@@ -50,5 +48,5 @@ func toInt(key string,Arguments []string,OrderLinker *orderLinker.OrderLinker)(i
 	if StructData.CheckError(err){
 		return 0,err
 	}
-	return orderInt,OrderLinker.GetCheckFunction(orderInt)(Arguments)
+	return orderInt,OrderLinker.GetCheckFunction(orderInt)(len(Arguments),Arguments)
 }

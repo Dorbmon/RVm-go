@@ -1,10 +1,7 @@
 package StructData
 
 import (
-	"github.com/Dorbmon/RVm/engine"
-	"github.com/Dorbmon/RVm/engine/compile"
-	"github.com/Dorbmon/RVm/engine/orderLinker"
-	"github.com/Dorbmon/RVm/engine/stack"
+	//"github.com/Dorbmon/RVm/engine/stack"
 	"github.com/Dorbmon/RVm/engine/type"
 	"os"
 	"sync"
@@ -30,15 +27,37 @@ type CodeArea struct{
 	Codes []*Code
 	NowPointer *Code	//指向当前执行的代码
 }
+type OrderLinker struct {
+	Order []*Order
+	OrderString map[string]*int
+}
+type Order struct{
+	Function LinkerFunction
+	CheckFunction CheckFunction
+}
+type Stack struct{
+	TopNode *Node
+	MaxDeep int
+	NowDeep int
+}
+type Node struct{
+	NodeAfter *Node
+	Data *StackObject
+}
+type LinkerFunction func(Arguments []string,Stack *Stack)EngineError	//对方函数不需要判断参数个数，因为在传递调用之前一定是已经完成参数个数检测的。
+type CheckFunction func(OrderInt int,Arguments []string)EngineError	//用来在编译时期检测参数类型等信息
 type Progress struct{	//单个进程
 	Id uint64
 	Name string
 	Slience []Slience
 	Memory Memory
-	Compiler *compile.Compiler
+	Compiler *Compiler
 	CompiledCode *CompiledCode
-	OrderLinker *orderLinker.OrderLinker
-	Stack *stack.Stack
+	OrderLinker *OrderLinker
+	Stack *Stack
+}
+type Compiler struct{
+	Code Code
 }
 type Slience struct{	//进程切片
 	From uint64
@@ -53,7 +72,7 @@ type Variable struct{
 	Name string
 }
 type Memory struct{
-	Engine *engine.RVM
+	Engine *RVM
 	Master *Memory
 	Variables map[string]*Variable
 	UseLock sync.Mutex
