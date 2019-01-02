@@ -2,19 +2,23 @@ package engine
 
 import (
 	"fmt"
-	"github.com/Dorbmon/RVm/engine/compile"
 	"github.com/Dorbmon/RVm/engine/error"
-	"github.com/Dorbmon/RVm/engine/orderLinker"
-	"github.com/Dorbmon/RVm/engine/stack"
 	"github.com/Dorbmon/RVm/struct"
 	"math/rand"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
-	"unsafe"
 )
-type RVM StructData.RVM
+type RVM struct {
+	MainRegister StructData.RegisterList
+	Memory *StructData.Memory
+	Progress map[string]*StructData.Progress
+	ProgressById map[uint64]*StructData.Progress	//与上方Progress是同一个。不过是索引方式不同。
+	DebugFilePath string
+	OutputFileName string
+	OutputWriter *os.File
+}
 func (this RVM)Init(){
 	//初始化debug信息输出目录
 	FileDir := GetCurPath()
@@ -32,6 +36,8 @@ func (this RVM)Init(){
 		os.Exit(0)
 	}
 	this.OutputWriter = File
+	this.Progress = make(map[string]*StructData.Progress)
+	this.ProgressById = make(map[uint64]*StructData.Progress)
 	return
 }
 func (this RVM)CreateProgress(Name string)(Ok bool,ProgressId uint64){
@@ -53,7 +59,7 @@ func (this RVM)CreateProgress(Name string)(Ok bool,ProgressId uint64){
 		ProgressId = uint64(0)
 	again2:
 		ProgressId = rand.Uint64()
-		if this.ProgressById[ProgressId].Id != 0 {
+		if _,ok := this.ProgressById[ProgressId];ok {
 			goto again2
 		}
 		NewProgress := StructData.Progress{}
@@ -77,7 +83,6 @@ func (this RVM)LoadUncompiledCode(ProgressId uint64,From uint64,Code StructData.
 	}
 	//开始载入代码。并且编译代码
 	Progress.Compiler = &StructData.Compiler{}
-	c := unsafe.Pointer(Progress.Compiler)
 	ok,EngineErr,CompiledCode := Progress.Compiler.Compile(Progress.OrderLinker)
 	if !ok{
 		this.ThrowError(EngineErr)

@@ -1,7 +1,6 @@
 package StructData
 
 import (
-	//"github.com/Dorbmon/RVm/engine/stack"
 	"github.com/Dorbmon/RVm/engine/type"
 	"os"
 	"sync"
@@ -16,6 +15,8 @@ type RVM struct {
 	DebugFilePath string
 	OutputFileName string
 	OutputWriter *os.File
+	Compile func (OrderLinker *OrderLinker)(bool,EngineError,*CompiledCode)
+	RunCode func (ProgressId uint64)(EngineError)
 }
 type RegisterList struct{
 	CodePointer uint64	//指向内存中当前的代码位置 代号r1
@@ -30,6 +31,11 @@ type CodeArea struct{
 type OrderLinker struct {
 	Order []*Order
 	OrderString map[string]*int
+	GetAnRandomOrderInt func ()int
+	RegisterOrder func (OrderInt int,OrderString string,LinkFunctions LinkerFunction,CheckFunctions CheckFunction)(EngineError)
+	TranslateToInt func (OrderString string)(int,EngineError)
+	GetFunction func (OrderInt int)LinkerFunction
+	GetCheckFunction func (OrderInt int)CheckFunction
 }
 type Order struct{
 	Function LinkerFunction
@@ -39,6 +45,10 @@ type Stack struct{
 	TopNode *Node
 	MaxDeep int
 	NowDeep int
+	Pop func ()(*StackObject,EngineError)
+	Push func (Data interface{},Type int)(EngineError)
+	SetMaxDeep func (deep int)
+	Empty func ()bool
 }
 type Node struct{
 	NodeAfter *Node
@@ -58,6 +68,10 @@ type Progress struct{	//单个进程
 }
 type Compiler struct{
 	Code Code
+	LoadCode func (Code Code)
+	Compile func (OrderLinker *OrderLinker)(bool,EngineError,*CompiledCode,)
+	TranslateStringToINT func (code Code,OrderLinker *OrderLinker)(*CompiledCode,EngineError)
+	toInt func (key string,Arguments []string,OrderLinker *OrderLinker)(int,EngineError)
 }
 type Slience struct{	//进程切片
 	From uint64

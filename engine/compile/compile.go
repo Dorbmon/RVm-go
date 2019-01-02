@@ -6,7 +6,9 @@ import (
 	"github.com/Dorbmon/RVm/struct"
 )
 
-type Compiler StructData.Compiler
+type Compiler struct {
+	Code StructData.Code
+}
 
 func (this *Compiler)LoadCode(Code StructData.Code){
 	this.Code = Code

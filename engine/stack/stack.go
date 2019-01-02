@@ -5,17 +5,21 @@ import (
 	"github.com/Dorbmon/RVm/struct"
 	"strconv"
 )
+type Stack struct{
+	TopNode *StructData.Node
+	MaxDeep int
+	NowDeep int
+}
 
-type Stack StructData.Stack
+func (this Stack)Empty()bool{	//返回是否为空
 
-func (this *Stack)Empty()bool{	//返回是否为空
 	return this.TopNode == nil
 }
-func (this *Stack)SetMaxDeep(deep int){	//不能删除已经存在的数据
+func (this Stack)SetMaxDeep(deep int){	//不能删除已经存在的数据
 	this.MaxDeep = deep
 	return
 }
-func (this *Stack)Push(Data interface{},Type int)(StructData.EngineError){
+func (this Stack)Push(Data interface{},Type int)(StructData.EngineError){
 	if this.MaxDeep == -1 || this.NowDeep < this.MaxDeep{
 		this.NowDeep ++
 	}else{

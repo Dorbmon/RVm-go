@@ -9,7 +9,10 @@ import (
 	"strconv"
 )
 
-type OrderLinker StructData.OrderLinker
+type OrderLinker struct {
+	Order []*StructData.Order
+	OrderString map[string]*int
+}
 type order StructData.Order
 type Argument struct {
 	Data interface{}
