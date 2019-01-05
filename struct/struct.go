@@ -67,11 +67,11 @@ type Progress struct{	//单个进程
 	Stack *Stack
 }
 type Compiler struct{
+	RealObj interface{}	//用来储存真实对象
 	Code Code
 	LoadCode func (Code Code)
-	Compile func (OrderLinker *OrderLinker)(bool,EngineError,*CompiledCode,)
+	Compile func (OrderLinker *OrderLinker)(bool,EngineError,*CompiledCode)
 	TranslateStringToINT func (code Code,OrderLinker *OrderLinker)(*CompiledCode,EngineError)
-	toInt func (key string,Arguments []string,OrderLinker *OrderLinker)(int,EngineError)
 }
 type Slience struct{	//进程切片
 	From uint64
