@@ -2,15 +2,27 @@ package ability
 
 import (
 	"bytes"
-	"github.com/Dorbmon/RVm/engine"
-	vmDeal "github.com/Dorbmon/RVm/engine/ability/vm"
-	"github.com/Dorbmon/RVm/engine/orderLinker"
+	flow2 "github.com/Dorbmon/RVm/engine/ability/flow"
+	"github.com/Dorbmon/RVm/engine/ability/math"
+	//"github.com/Dorbmon/RVm/engine"
+	memory2 "github.com/Dorbmon/RVm/engine/ability/memory"
+	"github.com/Dorbmon/RVm/engine/ability/vm"
 	"github.com/Dorbmon/RVm/struct"
 )
 
-func LoadFunction(VM *engine.RVM,OrderLinker *orderLinker.OrderLinker,Progress *StructData.Progress){
-	vm := vmDeal.VmDeal{}
-	vm.RegisterAll(VM,OrderLinker,Progress)
+func LoadFunction(VM *StructData.RVM,Progress *StructData.Progress){
+	vm := new(vmDeal.VmDeal)
+	vm.RegisterAll(VM,Progress.OrderLinker,Progress)
+	Progress.Abilities["vm"] = vm
+	memory := new(memory2.Memory)
+	memory.RegisterAll(VM,Progress.OrderLinker,Progress)
+	Progress.Abilities["memory"] = memory
+	maths := new(math.Math)
+	maths.RegisterAll(VM,Progress.OrderLinker,Progress)
+	Progress.Abilities["maths"] = maths
+	flow := flow2.Flow{}
+	flow.RegisterAll(VM,Progress)
+	Progress.Abilities["flow"] = flow
 	return
 }
 

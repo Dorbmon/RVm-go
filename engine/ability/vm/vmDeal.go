@@ -1,15 +1,12 @@
-package vmDeal		//本包用来提供一些核心支持功能
+package vmDeal		//本包用来提供一些核心支持功能 与本地系统进行交互
 import (
-	"github.com/Dorbmon/RVm/engine"
 	"github.com/Dorbmon/RVm/engine/error"
-	"github.com/Dorbmon/RVm/engine/orderLinker"
-	"github.com/Dorbmon/RVm/engine/stack"
 	"github.com/Dorbmon/RVm/struct"
 	"strconv"
 )
 
 type VmDeal struct {
-	vm *engine.RVM
+	vm *StructData.RVM
 	Progress *StructData.Progress
 	OrderInt struct{
 		SetSystem int
@@ -18,9 +15,9 @@ type VmDeal struct {
 func (this VmDeal)ChangeProgress(NewProgress *StructData.Progress){
 	this.Progress = NewProgress
 }
-func (this VmDeal)RegisterAll(vm *engine.RVM,linker *orderLinker.OrderLinker,Progress *StructData.Progress)StructData.EngineError{
+func (this VmDeal)RegisterAll(vm *StructData.RVM,linker *StructData.OrderLinker,Progress *StructData.Progress)StructData.EngineError{
 	SetSystem := linker.GetAnRandomOrderInt()
-	err := linker.RegisterOrder(SetSystem,"SetSystem",2,this.SetSystem,this.CheckFunction)
+	err := linker.RegisterOrder(SetSystem,"SetSystem",this.SetSystem,this.CheckFunction)
 	if StructData.CheckError(err){
 		return err
 	}
@@ -48,7 +45,7 @@ func (this VmDeal)CheckFunction(OrderInt int,argument []string)StructData.Engine
 const (
 	MaxDeepOfStack = 0
 )
-func (this VmDeal)SetSystem(Arguments []string,Stack *stack.Stack)StructData.EngineError{
+func (this VmDeal)SetSystem(Arguments []string,Stack *StructData.Stack)StructData.EngineError{
 	ElementName := Arguments[0]	//设置的属性名称
 	Value := Arguments[1]	//属性值
 	ElementId,err := strconv.Atoi(ElementName)

@@ -8,10 +8,12 @@ import (
 	"math/rand"
 	"strconv"
 )
-
+const(
+	MaxOrderNumber = 100000	//最大指令数，理论上越大越好（因为RVM的算法导致）过小会导致引擎大量时间用在申请ID上，甚至死循环
+)
 type OrderLinker struct {
-	Order []*StructData.Order
-	OrderString map[string]*int
+	Order map[int]*StructData.Order
+	OrderString map[string]int
 }
 type order StructData.Order
 type Argument struct {
@@ -22,31 +24,48 @@ type LinkerFunction StructData.LinkerFunction	//对方函数不需要判断参�
 type CheckFunction StructData.CheckFunction	//用来在编译时期检测参数类型等信息
 func (this *OrderLinker)GetAnRandomOrderInt()int{
 again:
-	r := int(math.Abs(float64(rand.Intn(10000))))
+	r := int(math.Abs(float64(rand.Intn(MaxOrderNumber))))
 	if this.Order[r] == nil{
 		return r
 	}
 	goto again
+	this.Order[r] = &StructData.Order{}
 	return 0
 }
-func (this *OrderLinker)RegisterOrder(OrderInt int,OrderString string,LinkFunctions LinkerFunction,CheckFunctions CheckFunction)(StructData.EngineError){
+func New()*StructData.OrderLinker{
+	cLinker := &OrderLinker{}
+
+	cLinker.OrderString = make(map[string]int)
+	cLinker.Order = make(map[int]*StructData.Order)
+
+	temp := &StructData.OrderLinker{}
+	temp.CLinker = cLinker
+	temp.RegisterOrder = cLinker.RegisterOrder
+	temp.GetAnRandomOrderInt = cLinker.GetAnRandomOrderInt
+	temp.GetCheckFunction = cLinker.GetCheckFunction
+	//cLinker.Order = temp.Order
+	temp.GetFunction = cLinker.GetFunction
+	temp.TranslateToInt = cLinker.TranslateToInt
+	return temp
+}
+func (this *OrderLinker)RegisterOrder(OrderInt int,OrderString string,LinkFunctions StructData.LinkerFunction,CheckFunctions StructData.CheckFunction)(StructData.EngineError){
 	if this.Order[OrderInt] != nil{	//该命令已经存在
 		return StructData.MakeError(EngineError.Bad,"Error Linking of Func " + strconv.Itoa(OrderInt) + " Because it has benn existed")
 	}
-	if this.OrderString[OrderString] != nil{	//该命令已经存在
+	if this.OrderString[OrderString] != 0{	//该命令已经存在
 		return StructData.MakeError(EngineError.Bad,"Error Linking of Func " + OrderString + " Because it has benn existed")
 	}
 	this.Order[OrderInt] = &StructData.Order{}
-	this.Order[OrderInt].Function = (StructData.LinkerFunction)(LinkFunctions)
-	this.Order[OrderInt].CheckFunction = (StructData.CheckFunction)(CheckFunctions)
-	this.OrderString[OrderString] = &OrderInt	//双索引系统，便于编译时的替换
+	this.Order[OrderInt].Function = LinkFunctions
+	this.Order[OrderInt].CheckFunction = CheckFunctions
+	this.OrderString[OrderString] = OrderInt	//双索引系统，便于编译时的替换
 	return StructData.EmptyError
 }
 func (this *OrderLinker)TranslateToInt(OrderString string)(int,StructData.EngineError){
-	if this.OrderString[OrderString] == nil{	//命令不存在
+	if this.OrderString[OrderString] == 0{	//命令不存在
 		return 0,StructData.MakeError(EngineError.Bad,"Undefined order :" + OrderString)
 	}
-	return *this.OrderString[OrderString],StructData.EmptyError
+	return this.OrderString[OrderString],StructData.EmptyError
 }
 func (this *OrderLinker)GetFunction(OrderInt int)StructData.LinkerFunction{	//假设已经存在
 	return this.Order[OrderInt].Function

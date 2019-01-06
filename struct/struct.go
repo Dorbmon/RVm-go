@@ -3,7 +3,6 @@ package StructData
 import (
 	"github.com/Dorbmon/RVm/engine/type"
 	"os"
-	"sync"
 	"time"
 )
 
@@ -15,7 +14,7 @@ type RVM struct {
 	DebugFilePath string
 	OutputFileName string
 	OutputWriter *os.File
-	Compile func (OrderLinker *OrderLinker)(bool,EngineError,*CompiledCode)
+	//Compile func (OrderLinker *OrderLinker)(bool,EngineError,*CompiledCode)
 	RunCode func (ProgressId uint64)(EngineError)
 }
 type RegisterList struct{
@@ -29,8 +28,7 @@ type CodeArea struct{
 	NowPointer *Code	//指向当前执行的代码
 }
 type OrderLinker struct {
-	Order []*Order
-	OrderString map[string]*int
+	CLinker interface{}	//真实链接器
 	GetAnRandomOrderInt func ()int
 	RegisterOrder func (OrderInt int,OrderString string,LinkFunctions LinkerFunction,CheckFunctions CheckFunction)(EngineError)
 	TranslateToInt func (OrderString string)(int,EngineError)
@@ -42,6 +40,7 @@ type Order struct{
 	CheckFunction CheckFunction
 }
 type Stack struct{
+	RStack interface{}	//真实栈
 	TopNode *Node
 	MaxDeep int
 	NowDeep int
@@ -60,11 +59,13 @@ type Progress struct{	//单个进程
 	Id uint64
 	Name string
 	Slience []Slience
-	Memory Memory
+	Memory *Memory
 	Compiler *Compiler
 	CompiledCode *CompiledCode
 	OrderLinker *OrderLinker
 	Stack *Stack
+	Abilities map[string]interface{}	//用来防止Go 自动释放内存
+	Line *int	//现在执行的行
 }
 type Compiler struct{
 	RealObj interface{}	//用来储存真实对象
@@ -86,10 +87,11 @@ type Variable struct{
 	Name string
 }
 type Memory struct{
-	Engine *RVM
-	Master *Memory
-	Variables map[string]*Variable
-	UseLock sync.Mutex
+	RMemory interface{}	//真实内存控制器
+	AddVariable func(Name string,Value *Value)EngineError
+	SetVariable func(Name string,Value *Value)EngineError
+	GetVariable func(Name string)*Value
+	GetType func(Name string)int
 }
 
 type EngineError struct{

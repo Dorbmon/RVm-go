@@ -41,7 +41,8 @@ func (this *Compiler)TranslateStringToINT(code StructData.Code,OrderLinker *Stru
 	result := &StructData.CompiledCode{}
 	for Line := 0;Line < len(code.Lines);Line ++{
 		//开始对每一行进行处理，根据硬性规定，每一行只有第一个单词为命令
-		result.Lines[Line] = &StructData.CodeLine{}
+		result.Lines = append(result.Lines,&StructData.CodeLine{})
+		//result.Lines[Line] = &StructData.CodeLine{}
 		result.Lines[Line].Order,err = toInt(code.Lines[Line][0],code.Lines[Line][1:],OrderLinker)
 		if StructData.CheckError(err){	//出现不存在的指令
 			return nil,err

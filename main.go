@@ -19,7 +19,7 @@ func main(){
 		tmp := make([]string,5)
 		c.Lines = append(c.Lines,tmp)
 	}
-	c.Lines[0][0] = "var"
+	c.Lines[0][0] = "newvar"
 	c.Lines[0][1] = "count"
 	c.Lines[1][0] = "add"
 	c.Lines[1][1] = "count"

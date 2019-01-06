@@ -10,7 +10,16 @@ type Stack struct{
 	MaxDeep int
 	NowDeep int
 }
-
+func New()*StructData.Stack{
+	cStack := &Stack{}
+	temp := &StructData.Stack{}
+	temp.RStack = cStack
+	temp.Push = cStack.Push
+	temp.Pop = cStack.Pop
+	temp.SetMaxDeep = cStack.SetMaxDeep
+	temp.Empty = cStack.Empty
+	return temp
+}
 func (this Stack)Empty()bool{	//返回是否为空
 
 	return this.TopNode == nil

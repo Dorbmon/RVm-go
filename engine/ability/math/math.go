@@ -1,29 +1,25 @@
 package math
 
 import (
-	"github.com/Dorbmon/RVm/engine"
 	"github.com/Dorbmon/RVm/engine/error"
-	"github.com/Dorbmon/RVm/engine/memory"
-	"github.com/Dorbmon/RVm/engine/orderLinker"
-	"github.com/Dorbmon/RVm/engine/stack"
+	"github.com/Dorbmon/RVm/engine/type"
 	"github.com/Dorbmon/RVm/struct"
 	"strconv"
 )
 type Math struct{
-	Vm *engine.RVM
+	Vm *StructData.RVM
 	Process *StructData.Progress
 	orderInt struct {
 		Add int
 	}
 }
-func (this Math)RegisterAll(vm *engine.RVM,linker *orderLinker.OrderLinker,Process *StructData.Progress)StructData.EngineError{
-	this.orderInt.Add = linker.GetAnRandomOrderInt()
-	err := linker.RegisterOrder(this.orderInt.Add,"newvar",this.Add,this.CheckFunction)
-	if StructData.CheckError(err){
-		return err
-	}
+func (this Math)RegisterAll(vm *StructData.RVM,linker *StructData.OrderLinker,Process *StructData.Progress)StructData.EngineError{
 	this.Process = Process
 	this.Vm = vm
+	this.orderInt.Add = linker.GetAnRandomOrderInt()
+	err := linker.RegisterOrder(this.orderInt.Add,"add",this.Add,this.CheckFunction)
+	if StructData.CheckError(err){
+	}
 	return StructData.EmptyError
 }
 func (this Math)CheckFunction(OrderInt int,Arguments []string)StructData.EngineError{
@@ -40,10 +36,15 @@ func (this Math)CheckFunction(OrderInt int,Arguments []string)StructData.EngineE
 	}
 	return StructData.EmptyError
 }
-func (this Math)Add(Arguments []string,Stack *stack.Stack)StructData.EngineError{
+func (this Math)Add(Arguments []string,Stack *StructData.Stack)StructData.EngineError{
 	VariableName := Arguments[0]
-	oldData := this.Process.Memory.Variables[Arguments[0]].Value
-	Addn,_ := strconv.Atoi(Arguments[0])
-	oldData.Value = oldData.Value.(int) + Addn
-	return (memory.Memory)(this.Process.Memory).SetVariable(VariableName,oldData)
+	oldData := this.Process.Memory.GetVariable(Arguments[0])
+	if oldData.Value == nil{
+		oldData.Value = ""
+	}
+	Addn,_ := strconv.Atoi(Arguments[1])
+	oldint,_ := strconv.Atoi(oldData.Value.(string))
+	oldData.Value = oldint + Addn
+	oldData.Type = TypeSystem.Int
+	return this.Process.Memory.SetVariable(VariableName,oldData)
 }
