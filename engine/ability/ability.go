@@ -25,10 +25,6 @@ func LoadFunction(VM *StructData.RVM,Progress *StructData.Progress){
 	Progress.Abilities["flow"] = flow
 	return
 }
-
-
-
-
 func AddString(Data []string)string{	//拼接文本
 	var buffer bytes.Buffer
 	for i := 0; i < len(Data); i ++{

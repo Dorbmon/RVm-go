@@ -22,18 +22,29 @@ func (this *Compiler)LoadCode(Code StructData.Code){
 	this.Code = &Code
 	return
 }
-func (this *Compiler)Compile(OrderLinker *StructData.OrderLinker)(bool,StructData.EngineError,*StructData.CompiledCode,){
+func (this *Compiler)Compile(OrderLinker *StructData.OrderLinker)(bool,StructData.EngineError,*StructData.CompiledCode,[]*StructData.CodeTreeNode){
+	var CodeTree []*StructData.CodeTreeNode
+	var NowCodeNode int
 	//开始编译
 	if this.Code == nil{
 		//没有代码
-		return false,StructData.MakeError(EngineError.Bad,"There is no code in the Compiler."),&StructData.CompiledCode{}
+		return false,StructData.MakeError(EngineError.Bad,"There is no code in the Compiler."),&StructData.CompiledCode{},CodeTree
 	}
 	//首先进行翻译，将所有的字符串指令翻译为int
 	CompiledCode,err := this.TranslateStringToINT(*this.Code,OrderLinker)
 	if StructData.CheckError(err){
-		return false,err,&StructData.CompiledCode{}
+		return false,err,&StructData.CompiledCode{},CodeTree
 	}
-	return true,StructData.EmptyError,CompiledCode
+	//以上为旧RVM代码，现在增加新的直接访问式. 可以避免文本解析 并且使用hash table.
+	//开始加载代码树
+
+	for Line := 0;Line < len(CompiledCode.Lines);Line ++ {
+		CodeTree = append(CodeTree, new(StructData.CodeTreeNode))
+		CodeTree[NowCodeNode].Function = OrderLinker.GetFunction(CompiledCode.Lines[Line].Order)
+		CodeTree[NowCodeNode].Arguments = CompiledCode.Lines[Line].Data
+		NowCodeNode ++
+	}
+	return true,StructData.EmptyError,CompiledCode,CodeTree
 }
 func (this *Compiler)TranslateStringToINT(code StructData.Code,OrderLinker *StructData.OrderLinker)(*StructData.CompiledCode,StructData.EngineError){
 	//开始处理

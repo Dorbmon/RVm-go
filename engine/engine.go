@@ -74,8 +74,6 @@ func (this *RVM) CreateProgress(Name string) (Ok bool, ProgressId uint64) {
 		//NewProgress := StructData.Progress{}
 		this.ProgressById[ProgressId] = new(StructData.Progress)
 		this.Progress[Name] = this.ProgressById[ProgressId]
-		this.Progress[Name].Id = ProgressId
-		this.Progress[Name].Slience = make([]StructData.Slience, 1)
 		this.Progress[Name].Name = Name
 	}
 	//初始化指令链接系统，并进行初始化链接
@@ -95,12 +93,13 @@ func (this *RVM) LoadUncompiledCode(ProgressId uint64, From uint64, Code StructD
 	//开始载入代码。并且编译代码
 	Progress.Compiler = compile.New()
 	Progress.Compiler.LoadCode(Code)
-	ok, EngineErr, CompiledCode := Progress.Compiler.Compile(Progress.OrderLinker)
+	ok, EngineErr, CompiledCode,Codetree := Progress.Compiler.Compile(Progress.OrderLinker)
 	if !ok {
 		this.ThrowError(EngineErr)
 		return false, EngineErr
 	}
 	Progress.CompiledCode = CompiledCode
+	Progress.CodeTree = Codetree
 	return false, StructData.EmptyError
 }
 func (this *RVM) RunCode(ProgressId uint64) StructData.EngineError {
@@ -119,12 +118,18 @@ func (this *RVM) RunCode(ProgressId uint64) StructData.EngineError {
 	//因为有一些流程指令，所以在这里要提供行数给库
 	Line := 0
 	Progress.Line = &Line
-	for ; Line < len(Progress.CompiledCode.Lines); Line++ {
-		NowLine := Progress.CompiledCode.Lines[Line]
+	Codetree := Progress.CodeTree
+	for ; Line < len(Codetree); Line++ {
+		/*RVM旧 解释系统！ 需要文本处理，效率较低*/
+		/*NowLine := Progress.CompiledCode.Lines[Line]
 		//获取到指令立刻调用OrderLinker中对应的函数
 		Function := Progress.OrderLinker.GetFunction(NowLine.Order)
 		err := Function(NowLine.Data, Progress.Stack)
 		if StructData.CheckError(err) { //引擎出现错误
+			this.ThrowError(err)
+		}*/
+		err := Codetree[Line].Function(Codetree[Line].Arguments,Progress.Stack)
+		if StructData.CheckError(err){
 			this.ThrowError(err)
 		}
 		continue

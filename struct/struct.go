@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+type CodeTreeNode struct {	//RVM编译系统的结构 用来存放编译后代码
+	Function LinkerFunction
+	Arguments []string
+}
 type RVM struct {
 	MainRegister RegisterList
 	Memory *Memory
@@ -44,7 +48,7 @@ type Stack struct{
 	TopNode *Node
 	MaxDeep int
 	NowDeep int
-	Pop func ()(*StackObject,EngineError)
+	Pop func ()(StackObject,EngineError)
 	Push func (Data interface{},Type int)(EngineError)
 	SetMaxDeep func (deep int)
 	Empty func ()bool
@@ -62,6 +66,7 @@ type Progress struct{	//单个进程
 	Memory *Memory
 	Compiler *Compiler
 	CompiledCode *CompiledCode
+	CodeTree []*CodeTreeNode
 	OrderLinker *OrderLinker
 	Stack *Stack
 	Abilities map[string]interface{}	//用来防止Go 自动释放内存
@@ -71,7 +76,7 @@ type Compiler struct{
 	RealObj interface{}	//用来储存真实对象
 	Code Code
 	LoadCode func (Code Code)
-	Compile func (OrderLinker *OrderLinker)(bool,EngineError,*CompiledCode)
+	Compile func (OrderLinker *OrderLinker)(bool,EngineError,*CompiledCode,[]*CodeTreeNode)
 	TranslateStringToINT func (code Code,OrderLinker *OrderLinker)(*CompiledCode,EngineError)
 }
 type Slience struct{	//进程切片
